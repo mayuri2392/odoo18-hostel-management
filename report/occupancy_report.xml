@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <template id="report_occupancy_pdf_document">
+      <t t-call="web.html_container">
+        <t t-call="web.external_layout">
+
+          <t t-set="w" t-value="docs and docs[0] or False"/>
+
+          <!-- Safe strings -->
+          <t t-set="hostel_name" t-value="w and (w.hostel_id.name if w.hostel_id else 'All Hostels') or 'All Hostels'"/>
+          <t t-set="room_type_name" t-value="w and (w.room_type_id.name if w.room_type_id else 'All Room Types') or 'All Room Types'"/>
+
+          <!-- ✅ FIX: no format_date() -->
+          <t t-set="date_from_txt" t-value="w and w.date_from and w.date_from.strftime('%d %b %Y') or ''"/>
+          <t t-set="date_to_txt" t-value="w and w.date_to and w.date_to.strftime('%d %b %Y') or ''"/>
+
+          <t t-set="total_beds" t-value="w and (w.total_beds or 0) or 0"/>
+          <t t-set="occupied_beds" t-value="w and (w.occupied_beds or 0) or 0"/>
+          <t t-set="available_beds" t-value="w and (w.available_beds or 0) or 0"/>
+
+          <t t-set="rate" t-value="w and float(w.occupancy_rate or 0.0) or 0.0"/>
+          <t t-set="rate" t-value="0.0 if rate &lt; 0.0 else (100.0 if rate &gt; 100.0 else rate)"/>
+          <t t-set="rate_txt" t-value="str(round(rate, 2))"/>
+
+          <div class="page" style="font-family:Arial, Helvetica, sans-serif; color:#111827;">
+
+            <!-- Header -->
+            <div style="background:#71639e; color:#fff; padding:16px; border-radius:12px;">
+              <div style="font-size:22px; font-weight:800;">Occupancy Report</div>
+              <div style="margin-top:6px; font-size:12px; opacity:.85;">
+                <span t-esc="date_from_txt"/> — <span t-esc="date_to_txt"/>
+              </div>
+              <div style="margin-top:4px; font-size:11px; opacity:.7;">
+                Generated on <t t-esc="datetime.datetime.now().strftime('%d %b %Y')"/>
+                at <t t-esc="datetime.datetime.now().strftime('%I:%M %p')"/>
+              </div>
+            </div>
+
+            <!-- Details -->
+            <div style="margin-top:12px; border:1px solid #E5E7EB; border-radius:12px; padding:12px; background:#F9FAFB;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                <tr>
+                  <td style="width:25%; padding:4px 0;">
+                    <div style="color:#6B7280; font-size:11px;">Hostel</div>
+                    <div style="font-weight:700;" t-esc="hostel_name"/>
+                  </td>
+                  <td style="width:25%; padding:4px 0;">
+                    <div style="color:#6B7280; font-size:11px;">Room Type</div>
+                    <div style="font-weight:700;" t-esc="room_type_name"/>
+                  </td>
+                  <td style="width:25%; padding:4px 0;">
+                    <div style="color:#6B7280; font-size:11px;">Report Type</div>
+                    <div style="font-weight:700;">
+                      <t t-if="w and w.report_type == 'daily'">Daily Occupancy</t>
+                      <t t-elif="w and w.report_type == 'monthly'">Monthly Summary</t>
+                      <t t-else="">Detailed Report</t>
+                    </div>
+                  </td>
+                  <td style="width:25%; padding:4px 0;">
+                    <div style="color:#6B7280; font-size:11px;">Period</div>
+                    <div style="font-weight:700;">
+                      <span t-esc="date_from_txt"/> to <span t-esc="date_to_txt"/>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- KPI -->
+            <div style="margin-top:12px;">
+              <table style="width:100%; border-spacing:10px;">
+                <tr>
+                  <td style="border:1px solid #E5E7EB; border-radius:12px; padding:12px;">
+                    <div style="color:#6B7280; font-size:11px;">Total Beds</div>
+                    <div style="font-size:22px; font-weight:800;" t-esc="total_beds"/>
+                  </td>
+                  <td style="border:1px solid #E5E7EB; border-radius:12px; padding:12px;">
+                    <div style="color:#6B7280; font-size:11px;">Occupied</div>
+                    <div style="font-size:22px; font-weight:800;" t-esc="occupied_beds"/>
+                  </td>
+                  <td style="border:1px solid #E5E7EB; border-radius:12px; padding:12px;">
+                    <div style="color:#6B7280; font-size:11px;">Available</div>
+                    <div style="font-size:22px; font-weight:800;" t-esc="available_beds"/>
+                  </td>
+                  <td style="border:1px solid #E5E7EB; border-radius:12px; padding:12px;">
+                    <div style="color:#6B7280; font-size:11px;">Occupancy</div>
+                    <div style="font-size:22px; font-weight:800; white-space:nowrap;">
+                      <span t-esc="rate_txt"/>%
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Progress -->
+            <div style="margin-top:10px; border:1px solid #E5E7EB; border-radius:12px; padding:12px;">
+              <div style="font-weight:700; margin-bottom:8px;">Occupancy Progress</div>
+              <div style="height:16px; background:#E5E7EB; border-radius:999px; overflow:hidden;">
+                <div t-att-style="'height:16px; background:#71639e; width:' + rate_txt + '%;'"></div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px; text-align:center; color:#6B7280; font-size:10px;">
+              Confidential • Hostel Management System • Page <span class="page"/> / <span class="topage"/>
+            </div>
+
+          </div>
+
+        </t>
+      </t>
+    </template>
+
+  </data>
+</odoo>

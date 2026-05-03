@@ -1,0 +1,723 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ================================================= -->
+        <!-- HOSTEL IMAGE (GALLERY) VIEWS -->
+        <!-- ================================================= -->
+        <record id="view_hostel_image_kanban" model="ir.ui.view">
+            <field name="name">hostel.image.kanban</field>
+            <field name="model">hostel.image</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_small_column">
+                    <field name="image"/>
+                    <field name="hostel_id"/>
+
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="o_kanban_record o_kanban_card">
+                                <div style="border-radius:12px; overflow:hidden;">
+                                    <img t-att-src="kanban_image('hostel.image', 'image', record.id.raw_value)"
+                                         style="width:100%; height:160px; object-fit:cover; display:block;"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="view_hostel_image_form" model="ir.ui.view">
+            <field name="name">hostel.image.form</field>
+            <field name="model">hostel.image</field>
+            <field name="arch" type="xml">
+                <form string="Gallery Image">
+                    <sheet>
+                        <group>
+                            <field name="hostel_id" invisible="1"/>
+                            <field name="image" widget="image" options="{'preview_image':'image'}"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <!-- ================================================= -->
+        <!-- Simple Hostel Kanban View -->
+        <!-- ================================================= -->
+        <record id="view_hostel_kanban" model="ir.ui.view">
+            <field name="name">hostel.hostel.kanban</field>
+            <field name="model">hostel.hostel</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="total_rooms"/>
+                    <field name="total_beds"/>
+                    <field name="available_beds"/>
+                    <field name="occupancy_rate"/>
+
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click"
+                                 style="padding: 16px; border: 1px solid #dee2e6; border-radius: 8px; margin: 4px; background: white;">
+                                <!-- Header with Name and Type -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <div style="flex: 1;">
+                                        <strong style="color: #71639e;">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                    <div>
+                                        <t t-if="record.type.raw_value == 'hostel'">
+                                            <span style="background: #71639e; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
+                                                <field name="type"/>
+                                            </span>
+                                        </t>
+                                        <t t-else="">
+                                            <span style="background: #fada5e; color: #212529; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
+                                                <field name="type"/>
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <!-- Stats in 2x2 grid -->
+                                <div style="font-size: 11px; color: #5a6c7d;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                        <div>
+                                            <div style="color: #6c757d; font-size: 10px;">Rooms</div>
+                                            <div style="font-weight: bold; color: #71639e;">
+                                                <field name="total_rooms"/>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div style="color: #6c757d; font-size: 10px;">Beds</div>
+                                            <div style="font-weight: bold; color: #71639e;">
+                                                <field name="total_beds"/>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div style="color: #6c757d; font-size: 10px;">Available</div>
+                                            <div style="font-weight: bold; color: #28a745;">
+                                                <field name="available_beds"/>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div style="color: #6c757d; font-size: 10px;">Occupancy</div>
+                                            <div style="font-weight: bold; color: #71639e;">
+                                                <field name="occupancy_rate"/>%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+
+        <!-- ================================================= -->
+        <!-- Hostel Form View -->
+        <!-- ================================================= -->
+        <record id="view_hostel_form" model="ir.ui.view">
+            <field name="name">hostel.hostel.form</field>
+            <field name="model">hostel.hostel</field>
+            <field name="arch" type="xml">
+                <form string="Hostel" class="o_hostel_form">
+                    <header></header>
+
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Hostel Name" class="mb-0"/>
+                            </h1>
+                        </div>
+
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_rooms_by_floor" type="object" class="oe_stat_button"
+                                    icon="fa-building">
+                                <field name="total_rooms" string="Rooms" widget="statinfo"/>
+                            </button>
+
+                            <button name="action_view_beds" type="object" class="oe_stat_button" icon="fa-bed">
+                                <field name="total_beds" string="Beds" widget="statinfo"/>
+                            </button>
+
+                            <button name="action_view_allocations" type="object" class="oe_stat_button" icon="fa-users">
+                                <field name="allocation_count" string="Allocations" widget="statinfo"/>
+                            </button>
+
+                            <button name="action_open_gallery_images"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-image">
+                                <field name="gallery_image_count" widget="statinfo" string="Gallery"/>
+                            </button>
+                        </div>
+
+                        <!-- ================================================= -->
+                        <!-- NOTEBOOK TABS -->
+                        <!-- ================================================= -->
+                        <div class="o_notebook">
+                            <nav class="nav nav-tabs" role="tablist">
+                                <a class="nav-link active" data-bs-toggle="tab" data-bs-target="#basic_info" role="tab">
+                                    Basic Info
+                                </a>
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#facilities" role="tab">
+                                    Facilities
+                                </a>
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#services" role="tab">
+                                    Services
+                                </a>
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#rent_config" role="tab">
+                                    Rent Configuration
+                                </a>
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#stats" role="tab">
+                                    Statistics
+                                </a>
+                            </nav>
+
+                            <div class="tab-content">
+
+                                <!-- ================================================= -->
+                                <!-- Basic Info Tab -->
+                                <!-- ================================================= -->
+                                <div class="tab-pane fade show active" id="basic_info" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-lg-8">
+                                            <div class="card mb-4">
+                                                <div class="card-header"
+                                                     style="background-color: #71639e; color: white;">
+                                                    <h6 class="mb-0" style="color: white;">Basic Information</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <group>
+                                                                <field name="type" widget="radio"
+                                                                       class="o_form_radio_custom"/>
+                                                                <field name="contact_person"/>
+                                                                <field name="phone" widget="phone"/>
+                                                                <field name="email" widget="email"/>
+                                                            </group>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <group>
+                                                                <field name="website" widget="url"/>
+                                                                <field name="total_rooms" readonly="1"/>
+                                                                <field name="total_beds" readonly="1"/>
+                                                                <field name="available_beds" readonly="1"/>
+                                                            </group>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card">
+                                                <div class="card-header"
+                                                     style="background-color: #71639e; color: white;">
+                                                    <h6 class="mb-0" style="color: white;">Address</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <field name="address" nolabel="1"
+                                                           placeholder="Enter complete hostel address..."
+                                                           class="o_address_field"/>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-4">
+                                            <div class="card h-100">
+                                                <div class="card-header"
+                                                     style="background-color: #71639e; color: white;">
+                                                    <h6 class="mb-0" style="color: white;">Hostel Image</h6>
+                                                </div>
+                                                <div class="card-body d-flex align-items-center justify-content-center">
+                                                    <field name="image_1920"
+                                                           widget="image"
+                                                           options="{'preview_image': 'image_1920'}"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ================================================= -->
+                                <!-- Facilities Tab (2 Columns) -->
+                                <!-- Only Included Facilities + Add-ons -->
+                                <!-- ================================================= -->
+                                <div class="tab-pane fade" id="facilities" role="tabpanel">
+                                    <div class="row">
+
+                                        <!-- INCLUDED FACILITIES -->
+                                        <div class="col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header" style="background-color: #71639e; color: white;">
+                                                    <h6 class="mb-0" style="color: white;">Included Facilities</h6>
+                                                    <small style="color: rgba(255,255,255,0.75);">
+                                                        Standard amenities included in all rooms
+                                                    </small>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                <span class="text-dark">Bed</span>
+                                                                <field name="facility_bed"/>
+                                                            </div>
+                                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                <span class="text-dark">Study Table</span>
+                                                                <field name="facility_table"/>
+                                                            </div>
+                                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                <span class="text-dark">Study Chair</span>
+                                                                <field name="facility_chair"/>
+                                                            </div>
+                                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                <span class="text-dark">Cupboard</span>
+                                                                <field name="facility_cupboard"/>
+                                                            </div>
+                                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                <span class="text-dark">Wi-Fi</span>
+                                                                <field name="facility_wifi"/>
+                                                            </div>
+                                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                <span class="text-dark">Daily Cleaning</span>
+                                                                <field name="facility_cleaning"/>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                <span class="text-dark">Fan</span>
+                                                                <field name="facility_fan"/>
+                                                            </div>
+                                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                <span class="text-dark">Lights</span>
+                                                                <field name="facility_lights"/>
+                                                            </div>
+                                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                <span class="text-dark">Common Bathroom</span>
+                                                                <field name="facility_common_bathroom"/>
+                                                            </div>
+                                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                <span class="text-dark">Attached Bathroom</span>
+                                                                <field name="facility_attached_bathroom"/>
+                                                            </div>
+                                                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                                                <span class="text-dark">Balcony</span>
+                                                                <field name="facility_balcony"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mt-4 pt-3 border-top"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ADD-ONS -->
+                                        <div class="col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header" style="background-color: #fada5e; color: #212529;">
+                                                    <h6 class="mb-0" style="color: #212529;">Add-ons</h6>
+                                                    <small style="color: rgba(33,37,41,0.75);">
+                                                        Optional facilities available at additional charges
+                                                    </small>
+                                                </div>
+
+                                                <div class="card-body">
+
+                                                    <div class="alert alert-info mb-4">
+                                                        <div class="d-flex">
+                                                            <div class="me-2"><strong>ℹ</strong></div>
+                                                            <div>
+                                                                <strong class="text-dark">Select Add-ons</strong>
+                                                                <p class="mb-0 text-muted">
+                                                                    Add-ons are chosen from the <b>Facility Type</b> and can have monthly charges.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mb-4">
+                                                        <div class="form-label fw-bold mb-2">Available Add-ons</div>
+                                                        <field name="extra_facility_ids"
+                                                               widget="many2many_tags"
+                                                               domain="[('active','=',True)]"
+                                                               options="{'no_create': True, 'no_open': True}"
+                                                               placeholder="+ Add facilities from Facility Type..."
+                                                               class="w-100"/>
+                                                        <small class="text-muted">
+                                                            Prices are configured in the <b>Rent Configuration</b> tab.
+                                                        </small>
+                                                    </div>
+
+                                                    <div class="rounded p-3 mb-4 bg-light border">
+                                                        <div class="d-flex">
+                                                            <div class="me-2" style="color: #e6c245;"><strong>💡</strong></div>
+                                                            <div>
+                                                                <strong class="text-dark">Quick Tips</strong>
+                                                                <ul class="mb-0 text-muted small">
+                                                                    <li>Manage facilities in <b>Configuration → Facility Type</b></li>
+                                                                    <li>Only selected add-ons will be available for pricing</li>
+                                                                    <li>Add-on rates apply during room allocations (if enabled in your flow)</li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="text-center">
+                                                        <span class="badge"
+                                                              style="background-color: #fada5e; color: #212529; padding: 8px 24px; margin-bottom: 8px;">
+                                                            Optional Add-ons
+                                                        </span>
+                                                        <p class="text-muted small mb-0">
+                                                            These can be charged additionally based on your rent configuration
+                                                        </p>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <!-- ================================================= -->
+                                <!-- Services Tab (NEW) -->
+                                <!-- ================================================= -->
+                                <div class="tab-pane fade" id="services" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="card">
+                                                <div class="card-header" style="background-color: #fada5e; color: #212529;">
+                                                    <h6 class="mb-0" style="color: #212529;">Services</h6>
+                                                    <small style="color: rgba(33,37,41,0.75);">
+                                                        Per-person services (Gym/Mess/Parking etc.) billed per allocation
+                                                    </small>
+                                                </div>
+
+                                                <div class="card-body">
+
+                                                    <div class="alert alert-info mb-4">
+                                                        <div class="d-flex">
+                                                            <div class="me-2"><strong>ℹ</strong></div>
+                                                            <div>
+                                                                <strong class="text-dark">Select Services</strong>
+                                                                <p class="mb-0 text-muted">
+                                                                    Services are billed per tenant/bed allocation. Rates are configured in the <b>Rent Configuration</b> tab.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mb-4">
+                                                        <div class="form-label fw-bold mb-2">Available Services</div>
+                                                        <field name="service_ids"
+                                                               widget="many2many_tags"
+                                                               domain="[('active','=',True)]"
+                                                               options="{'no_create': True, 'no_open': True}"
+                                                               placeholder="+ Add services from Service Type..."
+                                                               class="w-100"/>
+                                                        <small class="text-muted">
+                                                            Charges are configured in <b>Rent Configuration → Service Rates</b>.
+                                                        </small>
+                                                    </div>
+
+                                                    <div class="rounded p-3 mb-4 bg-light border">
+                                                        <div class="d-flex">
+                                                            <div class="me-2" style="color: #e6c245;"><strong>💡</strong></div>
+                                                            <div>
+                                                                <strong class="text-dark">Quick Tips</strong>
+                                                                <ul class="mb-0 text-muted small">
+                                                                    <li>Manage services in <b>Configuration → Service Types</b></li>
+                                                                    <li>Only selected services will be available for allocations</li>
+                                                                    <li>Charges are applied per person, per month</li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="text-center">
+                                                        <span class="badge"
+                                                              style="background-color: #fada5e; color: #212529; padding: 8px 24px; margin-bottom: 8px;">
+                                                            Per-Person Services
+                                                        </span>
+                                                        <p class="text-muted small mb-0">
+                                                            Choose the services offered by this hostel
+                                                        </p>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ================================================= -->
+                                <!-- Rent Configuration Tab (3 Columns) -->
+                                <!-- Room Rates + Add-on Rates + Service Rates -->
+                                <!-- ================================================= -->
+                                <div class="tab-pane fade" id="rent_config" role="tabpanel">
+                                    <div class="row">
+
+                                        <!-- ROOM RATES -->
+                                        <div class="col-lg-4">
+                                            <div class="card h-100 mb-4">
+                                                <div class="card-header" style="background-color: #71639e; color: white;">
+                                                    <h6 class="mb-0" style="color: white;">Room Rates</h6>
+                                                    <small style="color: rgba(255,255,255,0.75);">
+                                                        Base rent per person by room type
+                                                    </small>
+                                                </div>
+
+                                                <div class="card-body p-0">
+                                                    <div style="overflow-x: auto; padding: 15px;">
+                                                        <field name="rent_config_ids" mode="list" nolabel="1">
+                                                            <list editable="bottom" string="Room Rates">
+                                                                <field name="room_type_id" required="1" string="Room Type"/>
+                                                                <field name="base_rent" required="1" string="Rent per Person"/>
+                                                            </list>
+                                                        </field>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ADD-ON RATES -->
+                                        <div class="col-lg-4">
+                                            <div class="card h-100 mb-4">
+                                                <div class="card-header" style="background-color: #71639e; color: white;">
+                                                    <h6 class="mb-0" style="color: white;">Add-on Rates</h6>
+                                                    <small style="color: rgba(255,255,255,0.75);">
+                                                        Additional monthly charges for selected add-ons
+                                                    </small>
+                                                </div>
+
+                                                <div class="card-body p-0">
+                                                    <div style="overflow-x: auto; padding: 15px;">
+                                                        <field name="facility_rent_config_ids" mode="list" nolabel="1">
+                                                            <list editable="bottom" string="Add-on Rates">
+                                                                <!-- IMPORTANT: only allow facilities selected in hostel add-ons -->
+                                                                <field name="facility_type_id"
+                                                                       required="1"
+                                                                       string="Add-on"
+                                                                       domain="[('id','in', parent.extra_facility_ids)]"/>
+                                                                <field name="additional_rent" required="1" string="Additional Rent"/>
+                                                            </list>
+                                                        </field>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- SERVICE RATES -->
+                                        <div class="col-lg-4">
+                                            <div class="card h-100 mb-4">
+                                                <div class="card-header" style="background-color: #71639e; color: white;">
+                                                    <h6 class="mb-0" style="color: white;">Service Rates</h6>
+                                                    <small style="color: rgba(255,255,255,0.75);">
+                                                        Monthly charges per person for selected services
+                                                    </small>
+                                                </div>
+
+                                                <div class="card-body p-0">
+                                                    <div style="overflow-x: auto; padding: 15px;">
+                                                        <field name="service_rate_config_ids" mode="list" nolabel="1">
+                                                            <list editable="bottom" string="Service Rates">
+                                                                <field name="service_type_id"
+                                                                       required="1"
+                                                                       string="Service"
+                                                                       domain="[('id','in', parent.service_ids)]"/>
+                                                                <field name="monthly_charge" required="1" string="Monthly Charge (Per Person)"/>
+                                                            </list>
+                                                        </field>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="alert alert-info">
+                                        <div class="d-flex">
+                                            <div class="me-2"><strong>ℹ</strong></div>
+                                            <div>
+                                                <strong class="text-dark">Notes</strong>
+                                                <p class="mb-0 text-muted">
+                                                    Room rates apply to all allocations.
+                                                    Add-on rates apply only for facilities selected in the <b>Facilities → Add-ons</b> section.
+                                                    Service rates apply only for services selected in the <b>Services</b> tab.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ================================================= -->
+                                <!-- Statistics Tab (UNCHANGED) -->
+                                <!-- ================================================= -->
+                                <div class="tab-pane fade" id="stats" role="tabpanel">
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color: #71639e;">
+                                                        <field name="total_rooms" widget="integer" nolabel="1"/>
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Total Rooms</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color: #71639e;">
+                                                        <field name="total_beds" widget="integer" nolabel="1"/>
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Total Beds</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color: #71639e;">
+                                                        <field name="available_beds" widget="integer" nolabel="1"/>
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Available Beds</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color: #71639e;">
+                                                        <field name="occupancy_rate" widget="integer" nolabel="1"/>%
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Occupancy Rate</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header" style="background-color: #71639e; color: white;">
+                                                    <h6 class="mb-0" style="color: white;">Floor Information</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="mb-3">
+                                                                <div class="o_form_label text-muted">Minimum Floor</div>
+                                                                <div class="form-control-plaintext">
+                                                                    <field name="min_floor" readonly="1" nolabel="1"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="mb-3">
+                                                                <div class="o_form_label text-muted">Maximum Floor</div>
+                                                                <div class="form-control-plaintext">
+                                                                    <field name="max_floor" readonly="1" nolabel="1"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <div class="o_form_label text-muted">Floor Range</div>
+                                                        <div class="form-control-plaintext">
+                                                            <field name="floor_info" readonly="1" nolabel="1"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </sheet>
+
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+
+        <!-- Hostel List View -->
+        <record id="view_hostel_list" model="ir.ui.view">
+            <field name="name">hostel.hostel.list</field>
+            <field name="model">hostel.hostel</field>
+            <field name="arch" type="xml">
+                <list string="Hostels">
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="total_rooms"/>
+                    <field name="total_beds"/>
+                    <field name="available_beds"/>
+                    <field name="occupancy_rate" widget="progressbar" options="{'editable': false, 'max_value': 100}"/>
+                    <field name="contact_person"/>
+                    <field name="phone"/>
+                </list>
+            </field>
+        </record>
+
+
+        <!-- Hostel Search View -->
+        <record id="view_hostel_search" model="ir.ui.view">
+            <field name="name">hostel.hostel.search</field>
+            <field name="model">hostel.hostel</field>
+            <field name="arch" type="xml">
+                <search string="Search Hostels">
+                    <field name="name" string="Hostel Name"/>
+                    <field name="type"/>
+                    <field name="contact_person"/>
+                    <field name="phone"/>
+
+                    <filter string="Hostels" name="hostels" domain="[('type','=','hostel')]"/>
+                    <filter string="PGs" name="pgs" domain="[('type','=','pg')]"/>
+
+                    <group expand="0" string="Group By">
+                        <filter string="Type" name="group_type" context="{'group_by': 'type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+      <!-- ================================================= -->
+<!-- FILTERED ACTIONS: HOSTELS ONLY + PGs ONLY -->
+<!-- ================================================= -->
+
+<record id="action_hostel_only" model="ir.actions.act_window">
+    <field name="name">Hostels</field>
+    <field name="res_model">hostel.hostel</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('type','=','hostel')]</field>
+    <field name="context">{'default_type': 'hostel', 'search_default_hostels': 1}</field>
+</record>
+
+<record id="action_pg_only" model="ir.actions.act_window">
+    <field name="name">PGs</field>
+    <field name="res_model">hostel.hostel</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('type','=','pg')]</field>
+    <field name="context">{'default_type': 'pg', 'search_default_pgs': 1}</field>
+</record>
+
+
+
+
+    </data>
+</odoo>

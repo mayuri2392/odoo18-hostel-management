@@ -1,0 +1,844 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ================================================= -->
+        <!-- SECURITY DEPOSIT LEDGER (ACCOUNT.MOVE) LIST VIEW -->
+        <!-- ================================================= -->
+        <record id="view_account_move_deposit_ledger_list" model="ir.ui.view">
+            <field name="name">account.move.deposit.ledger.list</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <list string="Security Deposit Ledger" create="0" edit="0">
+                    <field name="invoice_date" string="Date"/>
+                    <field name="name" string="Number"/>
+                    <field name="ref"/>
+                    <field name="move_type" string="Type"/>
+                    <field name="amount_total" string="Amount"/>
+                    <field name="payment_state" string="Payment"/>
+                    <field name="state"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- ================================================= -->
+        <!-- SECURITY DEPOSIT LEDGER (ACCOUNT.MOVE.LINE) LIST VIEW -->
+        <!-- ================================================= -->
+        <record id="view_deposit_ledger_move_line_list" model="ir.ui.view">
+            <field name="name">deposit.ledger.move.line.list</field>
+            <field name="model">account.move.line</field>
+            <field name="arch" type="xml">
+                <list string="Security Deposit Ledger Lines" create="0" edit="0">
+                    <field name="date"/>
+                    <field name="move_id"/>
+                    <field name="name" string="Label"/>
+                    <field name="partner_id"/>
+                    <field name="account_id"/>
+                    <field name="debit"/>
+                    <field name="credit"/>
+                    <field name="balance"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- ================================================= -->
+        <!-- DEPOSIT POPUP PANEL (HOSTEL.ALLOCATION) -->
+        <!-- IMPORTANT: priority high so it will NOT be used as default form -->
+        <!-- ================================================= -->
+        <record id="view_allocation_deposit_panel_form" model="ir.ui.view">
+            <field name="name">hostel.allocation.deposit.panel.form</field>
+            <field name="model">hostel.allocation</field>
+            <field name="priority">999</field>
+            <field name="arch" type="xml">
+                <form string="Security Deposit" create="0" edit="0">
+                    <sheet>
+
+                        <div class="oe_title">
+                            <h2>Security Deposit</h2>
+                            <div class="text-muted">
+                                <field name="name" readonly="1"/>
+                            </div>
+                        </div>
+
+                        <group col="4">
+                            <field name="deposit_status" readonly="1"/>
+                            <field name="deposit_in_amount" readonly="1"/>
+                            <field name="deposit_out_amount" readonly="1"/>
+                            <field name="deposit_balance" readonly="1"/>
+                        </group>
+
+                        <separator string="Deposit Documents"/>
+
+                        <group col="2">
+                            <field name="deposit_move_id" readonly="1"/>
+                            <field name="deposit_refund_move_id" readonly="1"/>
+                        </group>
+
+                        <footer>
+                            <button name="action_view_deposit_ledger"
+                                    type="object"
+                                    string="Open Deposit Documents"
+                                    class="btn-primary"
+                                    invisible="deposit_ledger_count == 0"/>
+
+                            <button name="action_view_deposit_lines"
+                                    type="object"
+                                    string="Open Ledger Lines"
+                                    class="btn-secondary"
+                                    invisible="deposit_ledger_count == 0"/>
+
+                            <button string="Close" special="cancel" class="btn-light"/>
+                        </footer>
+
+                        <div class="alert alert-info mt-3" invisible="deposit_ledger_count != 0">
+                            <strong>No deposit documents yet.</strong>
+                            <div>
+                                This allocation has a Security Deposit amount, but deposit documents were not created.
+                                Usually this happens for old records or if the allocation was activated without using
+                                Confirm Allocation.
+                            </div>
+                        </div>
+
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- ============================= -->
+        <!-- Allocation Kanban View -->
+        <!-- ============================= -->
+        <record id="view_allocation_kanban" model="ir.ui.view">
+            <field name="name">hostel.allocation.kanban</field>
+            <field name="model">hostel.allocation</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state">
+                    <field name="name"/>
+                    <field name="state"/>
+                    <field name="tenant_id"/>
+                    <field name="hostel_id"/>
+                    <field name="room_id"/>
+                    <field name="bed_id"/>
+                    <field name="check_in_date"/>
+                    <field name="monthly_rent"/>
+                    <field name="actual_check_out_date"/>
+
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click"
+                                 style="padding:16px;border:1px solid #dee2e6;border-radius:8px;margin:4px;background:white;">
+
+                                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                                    <div>
+                                        <strong style="color:#71639e;display:block;">
+                                            <field name="name"/>
+                                        </strong>
+                                        <div style="font-size:11px;color:#6c757d;">
+                                            <i class="fa fa-user me-1"/>
+                                            <field name="tenant_id"/>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <t t-if="record.state.raw_value == 'active'">
+                                            <span style="background:#28a745;color:white;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:500;">
+                                                ✓ Active
+                                            </span>
+                                        </t>
+                                        <t t-elif="record.state.raw_value == 'draft'">
+                                            <span style="background:#fada5e;color:#212529;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:500;">
+                                                ○ Draft
+                                            </span>
+                                        </t>
+                                        <t t-elif="record.state.raw_value == 'checked_out'">
+                                            <span style="background:#6c757d;color:white;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:500;">
+                                                ⏹ Checked Out
+                                            </span>
+                                        </t>
+                                        <t t-else="">
+                                            <span style="background:#dc3545;color:white;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:500;">
+                                                ✕ Cancelled
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <div style="font-size:11px;color:#5a6c7d;margin-bottom:6px;">
+                                    <i class="fa fa-building me-1" style="color:#71639e;"/>
+                                    <field name="hostel_id"/>
+                                </div>
+
+                                <div style="font-size:11px;color:#5a6c7d;margin-bottom:6px;">
+                                    <i class="fa fa-door-closed me-1" style="color:#71639e;"/>
+                                    <field name="room_id"/>
+                                    <span style="margin: 0 6px;">|</span>
+                                    <i class="fa fa-bed me-1" style="color:#71639e;"/>
+                                    <field name="bed_id"/>
+                                </div>
+
+                                <div style="font-size:11px;color:#5a6c7d;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+                                    <div>
+                                        <div style="color:#6c757d;font-size:10px;">Check-in</div>
+                                        <div style="font-weight:bold;">
+                                            <field name="check_in_date"/>
+                                        </div>
+                                    </div>
+
+                                    <t t-if="record.state.raw_value == 'checked_out'">
+                                        <div>
+                                            <div style="color:#6c757d;font-size:10px;">Checked Out</div>
+                                            <div style="font-weight:bold;color:#71639e;">
+                                                <field name="actual_check_out_date"/>
+                                            </div>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div>
+                                            <div style="color:#6c757d;font-size:10px;">Monthly Rent</div>
+                                            <div style="font-weight:bold;color:#71639e;">
+                                                <field name="monthly_rent"/>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+
+                            </div>
+                        </t>
+                    </templates>
+
+                </kanban>
+            </field>
+        </record>
+
+        <!-- ================================================= -->
+        <!-- ALLOCATION LIST VIEW -->
+        <!-- ================================================= -->
+        <record id="view_allocation_list" model="ir.ui.view">
+            <field name="name">hostel.allocation.list</field>
+            <field name="model">hostel.allocation</field>
+            <field name="arch" type="xml">
+                <list string="Allocations">
+                    <field name="name"/>
+                    <field name="state"/>
+                    <field name="check_in_date"/>
+                    <field name="actual_check_out_date"/>
+                    <field name="monthly_rent"/>
+                    <field name="security_deposit"/>
+                    <field name="deposit_status"/>
+                    <field name="deposit_balance"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- ================================================= -->
+        <!-- ALLOCATION FORM VIEW -->
+        <!-- ================================================= -->
+        <record id="view_allocation_form" model="ir.ui.view">
+            <field name="name">hostel.allocation.form</field>
+            <field name="model">hostel.allocation</field>
+            <field name="arch" type="xml">
+                <form string="Allocation" class="o_allocation_form">
+
+                    <header>
+                        <button name="action_confirm"
+                                type="object"
+                                string="Confirm Allocation"
+                                class="btn-primary"
+                                invisible="state != 'draft'"/>
+
+                        <button name="action_cancel"
+                                type="object"
+                                string="Cancel"
+                                class="btn-secondary"
+                                invisible="state != 'draft'"/>
+
+                        <button name="action_checkout"
+                                type="object"
+                                string="Check Out"
+                                class="btn-primary"
+                                invisible="state != 'active'"/>
+
+                        <field name="state"
+                               widget="statusbar"
+                               statusbar_visible="draft,active,checked_out,cancelled"
+                               clickable="true"/>
+                    </header>
+
+                    <sheet>
+
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" readonly="1"/>
+                            </h1>
+                        </div>
+
+                        <div class="oe_button_box" name="button_box">
+
+                            <button name="action_view_invoices"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-file-text">
+                                <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                            </button>
+
+
+                            <button name="action_open_deposit_panel"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-money"
+                                    invisible="security_deposit &lt;= 0">
+                                <field name="deposit_ledger_count" widget="statinfo" string="Deposit"/>
+                            </button>
+
+                            <button name="action_generate_deposit_documents"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-wrench"
+                                    invisible="security_deposit &lt;= 0 or deposit_move_id">
+                                <span class="o_stat_text">Fix Deposit Docs</span>
+                            </button>
+
+                            <button name="action_view_tenant"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-user">
+                                <field name="tenant_id" widget="statinfo" string="Tenant"/>
+                            </button>
+
+                            <button name="action_view_hostel"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-building">
+                                <field name="hostel_id" widget="statinfo" string="Hostel"/>
+                            </button>
+
+                            <button name="action_view_bed"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-bed">
+                                <field name="bed_id" widget="statinfo" string="Bed"/>
+                            </button>
+
+                        </div>
+
+                        <div class="o_notebook">
+                            <nav class="nav nav-tabs">
+                                <a class="nav-link active" data-bs-toggle="tab" data-bs-target="#allocation_info">
+                                    Allocation Information
+                                </a>
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#billing_info">
+                                    Billing Info
+                                </a>
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#payment_info">
+                                    Payment Info
+                                </a>
+                            </nav>
+
+                            <div class="tab-content">
+
+                                <div class="tab-pane fade show active" id="allocation_info">
+
+                                    <!-- ✅ OLD STYLE ROW (looks better) -->
+                                    <div class="row align-items-stretch mb-4">
+
+                                        <div class="col-lg-8">
+                                            <div class="card w-100 h-100">
+                                                <div class="card-header" style="background-color:#71639e;color:white;">
+                                                    Allocation Details
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+
+                                                        <div class="col-md-6">
+                                                            <group>
+                                                                <field name="tenant_id" required="1"/>
+                                                                <field name="hostel_id" required="1"/>
+                                                                <field name="preferred_room_type_id"/>
+                                                                <field name="preferred_ac_type"/>
+                                                                <field name="room_id"
+                                                                       domain="[('id','in',filtered_room_ids)]"
+                                                                       required="1"/>
+                                                                <field name="bed_id"
+                                                                       domain="[('id','in',filtered_bed_ids)]"
+                                                                       required="1"/>
+                                                            </group>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <group>
+                                                                <div class="o_form_label">Check-in Date
+                                                                    <span class="text-danger">*</span>
+                                                                </div>
+                                                                <field name="check_in_date" required="1" nolabel="1"/>
+
+                                                                <div class="mt-3">
+                                                                    <div class="o_form_label">Expected Check-out Date
+                                                                    </div>
+                                                                    <field name="expected_check_out_date" nolabel="1"/>
+                                                                </div>
+
+                                                                <div class="mt-3">
+                                                                    <div class="o_form_label">Actual Check-out Date
+                                                                    </div>
+                                                                    <field name="actual_check_out_date" nolabel="1"
+                                                                           readonly="state != 'checked_out'"/>
+                                                                </div>
+
+                                                                <div class="mt-3">
+                                                                    <div class="o_form_label">Duration (Days)</div>
+                                                                    <field name="duration_days" nolabel="1"
+                                                                           readonly="1"/>
+                                                                </div>
+                                                            </group>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ✅ OLD STYLE STATUS CARD -->
+                                        <div class="col-lg-4">
+                                            <div class="card w-100 h-100">
+                                                <div class="card-header" style="background-color:#71639e;color:white;">
+                                                    Allocation Status
+                                                </div>
+                                                <div class="card-body text-center">
+                                                    <field name="state"/>
+                                                    <div class="text-muted mt-2">
+                                                        Created on:
+                                                        <field name="create_date" widget="datetime"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                    <!-- ✅ FULL WIDTH ADDITIONAL INFO aligns perfectly now -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="card">
+                                                <div class="card-header" style="background-color:#71639e;color:white;">
+                                                    Additional Information
+                                                </div>
+                                                <div class="card-body">
+                                                    <field name="notes" nolabel="1"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="tab-pane fade" id="billing_info" role="tabpanel">
+                                    <!-- ✅ FULL WIDTH ROW so it always aligns perfectly -->
+                                    <div class="row">
+                                        <div class="col-12">
+
+                                            <div class="card mb-4">
+                                                <div class="card-header" style="background-color:#71639e;color:white;">
+                                                    Billing Information
+                                                </div>
+
+                                                <div class="card-body">
+
+                                                    <!-- ✅ Needed for JS domain evaluation -->
+                                                    <field name="hostel_service_ids" invisible="1"/>
+
+                                                    <!-- =================== TOP: SUMMARY TILES =================== -->
+                                                    <div class="row g-3 mb-3">
+
+                                                        <div class="col-md-4">
+                                                            <div class="border rounded-3 p-3 h-100"
+                                                                 style="background:#ffffff;">
+                                                                <div class="text-muted small mb-1">Monthly Rent</div>
+                                                                <div class="fw-semibold"
+                                                                     style="font-size:18px;color:#212529;">
+                                                                    <field name="monthly_rent" widget="monetary"
+                                                                           nolabel="1"
+                                                                           options="{'currency_field': 'currency_id'}"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="border rounded-3 p-3 h-100"
+                                                                 style="background:#ffffff;">
+                                                                <div class="text-muted small mb-1">Services Charge</div>
+                                                                <div class="fw-semibold"
+                                                                     style="font-size:18px;color:#212529;">
+                                                                    <field name="service_monthly_charge"
+                                                                           widget="monetary" nolabel="1"
+                                                                           options="{'currency_field': 'currency_id'}"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <!-- ✅ No purple background -->
+                                                            <div class="border rounded-3 p-3 h-100"
+                                                                 style="background:#ffffff;">
+                                                                <div class="text-muted small mb-1">Total Monthly</div>
+                                                                <div class="fw-semibold"
+                                                                     style="font-size:18px;color:#212529;">
+                                                                    <field name="total_monthly_charge" widget="monetary"
+                                                                           nolabel="1"
+                                                                           options="{'currency_field': 'currency_id'}"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <!-- =================== BOTTOM: 2 BOXES =================== -->
+                                                    <div class="row g-3">
+
+                                                        <div class="col-lg-7">
+                                                            <div class="border rounded-3 p-3 h-100"
+                                                                 style="background:#ffffff;">
+                                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                                    <h6 class="mb-0" style="color:#71639e;">Services
+                                                                    </h6>
+                                                                    <span class="text-muted small">Per person /
+                                                                        monthly
+                                                                    </span>
+                                                                </div>
+
+                                                                <div class="mb-2">
+                                                                    <div class="o_form_label">Select Services</div>
+                                                                    <field name="service_ids"
+                                                                           widget="many2many_tags"
+                                                                           options="{'no_create': True, 'no_open': True}"
+                                                                           placeholder="+ Select services..."/>
+                                                                </div>
+
+                                                                <small class="text-muted">
+                                                                    Service availability and rates are configured on the
+                                                                    Hostel.
+                                                                </small>
+
+                                                                <div class="mt-3 pt-3 border-top">
+                                                                    <div class="row">
+                                                                        <div class="col-sm-6">
+                                                                            <div class="text-muted small mb-1">Services
+                                                                                Charge
+                                                                            </div>
+                                                                            <div class="fw-semibold"
+                                                                                 style="color:#212529;">
+                                                                                <field name="service_monthly_charge"
+                                                                                       widget="monetary" nolabel="1"
+                                                                                       options="{'currency_field': 'currency_id'}"/>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-6">
+                                                                            <div class="text-muted small mb-1">Total
+                                                                                Monthly
+                                                                            </div>
+                                                                            <div class="fw-semibold"
+                                                                                 style="color:#212529;">
+                                                                                <field name="total_monthly_charge"
+                                                                                       widget="monetary" nolabel="1"
+                                                                                       options="{'currency_field': 'currency_id'}"/>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-lg-5">
+                                                            <div class="border rounded-3 p-3 h-100"
+                                                                 style="background:#ffffff;">
+                                                                <h6 class="mb-3" style="color:#71639e;">Rent &amp;
+                                                                    Deposit
+                                                                </h6>
+
+                                                                <div class="mb-3">
+                                                                    <div class="text-muted small mb-1">Monthly Rent
+                                                                    </div>
+                                                                    <field name="monthly_rent" widget="monetary"
+                                                                           nolabel="1"
+                                                                           options="{'currency_field': 'currency_id'}"/>
+                                                                </div>
+
+                                                                <div class="mb-3">
+                                                                    <div class="text-muted small mb-1">Security
+                                                                        Deposit
+                                                                    </div>
+                                                                    <field name="security_deposit" widget="monetary"
+                                                                           nolabel="1"
+                                                                           options="{'currency_field': 'currency_id'}"/>
+                                                                </div>
+
+                                                                <div class="pt-3 border-top">
+                                                                    <div class="text-muted small mb-1">Total Monthly
+                                                                        (Rent + Services)
+                                                                    </div>
+                                                                    <div class="fw-semibold"
+                                                                         style="font-size:16px;color:#212529;">
+                                                                        <field name="total_monthly_charge"
+                                                                               widget="monetary" nolabel="1"
+                                                                               options="{'currency_field': 'currency_id'}"/>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- FINANCE TAB remains unchanged in your file -->
+                                <!-- ================= FINANCE TAB ================= -->
+                                <div class="tab-pane fade" id="payment_info" role="tabpanel">
+
+                                    <div class="row g-3">
+
+                                        <div class="col-md-3">
+                                            <div class="card text-center h-100">
+                                                <div class="card-body">
+                                                    <div class="text-muted small mb-1">Total Paid</div>
+                                                    <h5 class="mb-0" style="color:#71639e;">
+                                                        <field name="paid_amount" widget="monetary" nolabel="1"
+                                                               options="{'currency_field': 'currency_id'}"/>
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="card text-center h-100">
+                                                <div class="card-body">
+                                                    <div class="text-muted small mb-1">Outstanding</div>
+
+                                                    <field name="due_amount" invisible="1"/>
+
+                                                    <h5 class="mb-0" style="color:#28a745;"
+                                                        invisible="due_amount &gt; 0">
+                                                        <field name="due_amount" widget="monetary" nolabel="1"
+                                                               options="{'currency_field': 'currency_id'}"/>
+                                                    </h5>
+
+                                                    <h5 class="mb-0" style="color:#dc3545;"
+                                                        invisible="due_amount &lt;= 0">
+                                                        <field name="due_amount" widget="monetary" nolabel="1"
+                                                               options="{'currency_field': 'currency_id'}"/>
+                                                    </h5>
+
+                                                    <div class="small text-muted mt-1" invisible="due_amount &lt;= 0">
+                                                        Needs follow-up
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="card text-center h-100">
+                                                <div class="card-body">
+                                                    <div class="text-muted small mb-1">Deposit Balance</div>
+                                                    <h5 class="mb-0" style="color:#71639e;">
+                                                        <field name="deposit_balance" widget="monetary" nolabel="1"
+                                                               options="{'currency_field': 'currency_id'}"/>
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="card text-center h-100">
+                                                <div class="card-body">
+                                                    <div class="text-muted small mb-1">Next Payment</div>
+                                                    <h5 class="mb-0" style="color:#71639e;">
+                                                        <field name="next_payment_date" nolabel="1" readonly="1"/>
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="card mt-4">
+                                        <div class="card-header" style="background-color:#71639e;color:white;">
+                                            <h6 class="mb-0" style="color:white;">Payment Summary</h6>
+                                        </div>
+                                        <div class="card-body">
+
+                                            <div class="row align-items-center">
+
+                                                <div class="col-md-4">
+                                                    <div class="text-muted small mb-2">Payment Status</div>
+
+                                                    <field name="payment_status" invisible="1"/>
+
+                                                    <span class="badge bg-success px-3 py-2"
+                                                          invisible="payment_status != 'paid'">
+                                                        <i class="fa fa-check me-1"/>Paid
+                                                    </span>
+
+                                                    <span class="badge bg-warning text-dark px-3 py-2"
+                                                          invisible="payment_status != 'partial'">
+                                                        <i class="fa fa-clock me-1"/>Partial
+                                                    </span>
+
+                                                    <span class="badge bg-danger px-3 py-2"
+                                                          invisible="payment_status != 'unpaid'">
+                                                        <i class="fa fa-times me-1"/>Unpaid
+                                                    </span>
+
+                                                </div>
+
+                                                <div class="col-md-8">
+                                                    <div class="row g-3">
+
+                                                        <div class="col-md-4">
+                                                            <div class="text-muted small">Paid</div>
+                                                            <div class="fw-semibold">
+                                                                <field name="paid_amount" widget="monetary" nolabel="1"
+                                                                       options="{'currency_field': 'currency_id'}"/>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="text-muted small">Due</div>
+                                                            <div class="fw-semibold">
+                                                                <field name="due_amount" widget="monetary" nolabel="1"
+                                                                       options="{'currency_field': 'currency_id'}"/>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="text-muted small">Deposit Balance</div>
+                                                            <div class="fw-semibold">
+                                                                <field name="deposit_balance" widget="monetary"
+                                                                       nolabel="1"
+                                                                       options="{'currency_field': 'currency_id'}"/>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="card mt-4">
+                                        <div class="card-header" style="background-color:#71639e;color:white;">
+                                            <h6 class="mb-0" style="color:white;">Deposit Movement</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+
+                                                <div class="col-md-4">
+                                                    <div class="text-muted small">Deposit Received</div>
+                                                    <div class="fw-semibold">
+                                                        <field name="deposit_in_amount" widget="monetary" nolabel="1"
+                                                               options="{'currency_field': 'currency_id'}"/>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="text-muted small">Deposit Refunded</div>
+                                                    <div class="fw-semibold">
+                                                        <field name="deposit_out_amount" widget="monetary" nolabel="1"
+                                                               options="{'currency_field': 'currency_id'}"/>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="text-muted small">Current Deposit Balance</div>
+                                                    <div class="fw-semibold">
+                                                        <field name="deposit_balance" widget="monetary" nolabel="1"
+                                                               options="{'currency_field': 'currency_id'}"/>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="alert alert-info mt-3 mb-0"
+                                                 invisible="deposit_ledger_count != 0">
+                                                <strong>No deposit documents yet.</strong>
+                                                <div>Deposit is configured, but documents were not created for this
+                                                    allocation.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- ============================= -->
+        <!-- Allocation Search View -->
+        <!-- ============================= -->
+        <record id="view_allocation_search" model="ir.ui.view">
+            <field name="name">hostel.allocation.search</field>
+            <field name="model">hostel.allocation</field>
+            <field name="arch" type="xml">
+                <search string="Search Allocations">
+                    <field name="name" string="Allocation ID"/>
+                    <field name="tenant_id" string="Tenant"/>
+                    <field name="hostel_id" string="Hostel"/>
+                    <field name="room_id" string="Room"/>
+                    <field name="bed_id" string="Bed"/>
+
+                    <filter string="Draft Allocations" name="draft" domain="[('state','=','draft')]"/>
+                    <filter string="Active Allocations" name="active" domain="[('state','=','active')]"/>
+                    <filter string="Checked Out" name="checked_out" domain="[('state','=','checked_out')]"/>
+                    <filter string="Cancelled" name="cancelled" domain="[('state','=','cancelled')]"/>
+
+                    <group expand="0" string="Group By">
+                        <filter string="Status" name="group_state" context="{'group_by':'state'}"/>
+                        <filter string="Tenant" name="group_tenant" context="{'group_by':'tenant_id'}"/>
+                        <filter string="Hostel" name="group_hostel" context="{'group_by':'hostel_id'}"/>
+                        <filter string="Room" name="group_room" context="{'group_by':'room_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- ================================================= -->
+        <!-- SERVER ACTION: Bulk Fix Legacy Deposits -->
+        <!-- ================================================= -->
+        <record id="action_fix_legacy_deposits_bulk_server" model="ir.actions.server">
+            <field name="name">Fix Legacy Deposit Docs</field>
+            <field name="model_id" ref="model_hostel_allocation"/>
+            <field name="binding_model_id" ref="model_hostel_allocation"/>
+            <field name="binding_type">action</field>
+            <field name="state">code</field>
+            <field name="code">action = records.action_fix_legacy_deposits_bulk()</field>
+        </record>
+
+        <!-- ================================================= -->
+        <!-- ALLOCATION ACTION -->
+        <!-- ================================================= -->
+        <record id="action_allocation" model="ir.actions.act_window">
+            <field name="name">Allocations</field>
+            <field name="res_model">hostel.allocation</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="views" eval="[
+                (ref('hostel_management.view_allocation_kanban'), 'kanban'),
+                (ref('hostel_management.view_allocation_list'), 'list'),
+                (ref('hostel_management.view_allocation_form'), 'form')
+            ]"/>
+            <field name="search_view_id" ref="view_allocation_search"/>
+            <field name="context">{'search_default_active': 1}</field>
+        </record>
+
+    </data>
+</odoo>

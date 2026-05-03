@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Room Types List View -->
+        <record id="view_room_type_list" model="ir.ui.view">
+            <field name="name">room.type.list</field>
+            <field name="model">room.type</field>
+            <field name="arch" type="xml">
+                <list string="Room Types">
+                    <field name="name" string="Room Type Name"/>
+                    <field name="default_capacity" string="Default Capacity"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Room Type Form View -->
+        <record id="view_room_type_form" model="ir.ui.view">
+            <field name="name">room.type.form</field>
+            <field name="model">room.type</field>
+            <field name="arch" type="xml">
+                <form string="Room Type">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" string="Room Type Name" required="1"/>
+                                <field name="default_capacity" string="Default Capacity" required="1"/>
+                                <field name="active"/>
+                            </group>
+                        </group>
+
+                        <group string="Description">
+                            <field name="description" nolabel="1"
+                                   placeholder="Add notes about this room type..."/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Room Type Search View -->
+        <record id="view_room_type_search" model="ir.ui.view">
+            <field name="name">room.type.search</field>
+            <field name="model">room.type</field>
+            <field name="arch" type="xml">
+                <search string="Search Room Types">
+                    <field name="name"/>
+                    <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                    <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+                </search>
+            </field>
+        </record>
+
+        <!-- Room Types Action -->
+        <record id="action_room_type" model="ir.actions.act_window">
+            <field name="name">Room Types</field>
+            <field name="res_model">room.type</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{'search_default_active': 1}</field>
+        </record>
+
+    </data>
+</odoo>

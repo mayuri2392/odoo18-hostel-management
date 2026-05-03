@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- ================================================= -->
+    <!-- PORTAL: TENANT (READ OWN RECORD ONLY) -->
+    <!-- ================================================= -->
+    <record id="rule_hostel_tenant_portal_own" model="ir.rule">
+      <field name="name">Portal: Tenant own record</field>
+      <field name="model_id" ref="model_hostel_tenant"/>
+      <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+      <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+    </record>
+
+    <!-- ================================================= -->
+    <!-- PORTAL: ALLOCATION (READ OWN RECORDS ONLY) -->
+    <!-- ================================================= -->
+    <record id="rule_hostel_allocation_portal_own" model="ir.rule">
+      <field name="name">Portal: Allocation own records</field>
+      <field name="model_id" ref="model_hostel_allocation"/>
+      <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+      <field name="domain_force">[('tenant_id.partner_id', '=', user.partner_id.id)]</field>
+    </record>
+
+    <!-- ================================================= -->
+    <!-- PORTAL: HOSTEL (READ ONLY - ONLY IF LINKED TO OWN ALLOCATIONS) -->
+    <!-- Requires hostel.hostel to have allocation_ids One2many to hostel.allocation via hostel_id -->
+    <!-- ================================================= -->
+    <record id="rule_hostel_hostel_portal_read" model="ir.rule">
+      <field name="name">Portal: Read hostels linked to my allocations</field>
+      <field name="model_id" ref="model_hostel_hostel"/>
+      <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+      <field name="domain_force">[('allocation_ids.tenant_id.partner_id', '=', user.partner_id.id)]</field>
+    </record>
+
+    <!-- ================================================= -->
+    <!-- PORTAL: ROOM (READ ONLY - ONLY IF LINKED TO OWN ALLOCATIONS) -->
+    <!-- Requires hostel.room to have allocation_ids One2many to hostel.allocation via room_id -->
+    <!-- ================================================= -->
+    <record id="rule_hostel_room_portal_read" model="ir.rule">
+      <field name="name">Portal: Read rooms linked to my allocations</field>
+      <field name="model_id" ref="model_hostel_room"/>
+      <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+      <field name="domain_force">[('allocation_ids.tenant_id.partner_id', '=', user.partner_id.id)]</field>
+    </record>
+
+    <!-- ================================================= -->
+    <!-- PORTAL: BED (READ ONLY - ONLY IF LINKED TO OWN ALLOCATIONS) -->
+    <!-- Requires hostel.bed to have allocation_ids One2many to hostel.allocation via bed_id -->
+    <!-- ================================================= -->
+    <record id="rule_hostel_bed_portal_read" model="ir.rule">
+      <field name="name">Portal: Read beds linked to my allocations</field>
+      <field name="model_id" ref="model_hostel_bed"/>
+      <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+      <field name="domain_force">[('allocation_ids.tenant_id.partner_id', '=', user.partner_id.id)]</field>
+    </record>
+
+  </data>
+</odoo>

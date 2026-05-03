@@ -1,0 +1,23 @@
+<odoo>
+    <record id="view_hostel_gallery_kanban" model="ir.ui.view">
+        <field name="name">hostel.gallery.kanban</field>
+        <field name="model">ir.attachment</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="o_kanban_record"
+                             style="padding:0; border:none;">
+                            <img t-att-src="'/web/content/%s?download=false' % record.id"
+                                 style="width:100%;
+                                        height:220px;
+                                        object-fit:cover;
+                                        border-radius:12px;
+                                        background:#f4f4f4;"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>

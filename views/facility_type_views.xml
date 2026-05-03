@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Facility Types List View -->
+        <record id="view_facility_type_list" model="ir.ui.view">
+            <field name="name">facility.type.list</field>
+            <field name="model">facility.type</field>
+            <field name="arch" type="xml">
+                <list string="Facility Types">
+                    <field name="name" string="Facility Type"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Facility Type Form View -->
+        <record id="view_facility_type_form" model="ir.ui.view">
+            <field name="name">facility.type.form</field>
+            <field name="model">facility.type</field>
+            <field name="arch" type="xml">
+                <form string="Facility Type">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" string="Facility Type" required="1"/>
+                                <field name="active"/>
+                            </group>
+                        </group>
+
+                        <group string="Description">
+                            <field name="description"
+                                   nolabel="1"
+                                   placeholder="Add notes about this facility type..."/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Facility Type Search View -->
+        <record id="view_facility_type_search" model="ir.ui.view">
+            <field name="name">facility.type.search</field>
+            <field name="model">facility.type</field>
+            <field name="arch" type="xml">
+                <search string="Search Facility Types">
+                    <field name="name"/>
+                    <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                    <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+                </search>
+            </field>
+        </record>
+
+        <!-- Facility Types Action -->
+        <record id="action_facility_type" model="ir.actions.act_window">
+            <field name="name">Facility Types</field>
+            <field name="res_model">facility.type</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{'search_default_active': 1}</field>
+        </record>
+
+    </data>
+</odoo>

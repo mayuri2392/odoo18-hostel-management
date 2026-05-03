@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ================================================= -->
+        <!-- SERVICE TYPES (CONFIGURATION) -->
+        <!-- ================================================= -->
+
+        <!-- Service Types List View -->
+        <record id="view_service_type_list" model="ir.ui.view">
+            <field name="name">hostel.service.type.list</field>
+            <field name="model">hostel.service.type</field>
+            <field name="arch" type="xml">
+                <list string="Service Types">
+                    <field name="name" string="Service Type"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Service Type Form View -->
+        <record id="view_service_type_form" model="ir.ui.view">
+            <field name="name">hostel.service.type.form</field>
+            <field name="model">hostel.service.type</field>
+            <field name="arch" type="xml">
+                <form string="Service Type">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" string="Service Type" required="1"/>
+                                <field name="active"/>
+                            </group>
+                        </group>
+
+                        <group string="Description">
+                            <field name="description"
+                                   nolabel="1"
+                                   placeholder="Add notes about this service type..."/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Service Type Search View -->
+        <record id="view_service_type_search" model="ir.ui.view">
+            <field name="name">hostel.service.type.search</field>
+            <field name="model">hostel.service.type</field>
+            <field name="arch" type="xml">
+                <search string="Search Service Types">
+                    <field name="name"/>
+                    <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                    <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+                </search>
+            </field>
+        </record>
+
+        <!-- Service Types Action -->
+        <record id="action_service_type" model="ir.actions.act_window">
+            <field name="name">Service Types</field>
+            <field name="res_model">hostel.service.type</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{'search_default_active': 1}</field>
+        </record>
+
+    </data>
+</odoo>

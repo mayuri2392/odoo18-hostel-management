@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="hostel_invoice_report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family: 'Helvetica', sans-serif;">
+
+                        <!-- ================= HEADER ================= -->
+                        <div style="border-bottom:2px solid #222; padding-bottom:12px; margin-bottom:24px;">
+                            <div class="row">
+                                <div class="col-6">
+                                    <h1 style="margin:0;">Hostel Rent Invoice</h1>
+                                    <p style="color:#777; margin:0;">Accommodation Billing</p>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <p style="margin:0;">
+                                        <strong>Invoice #</strong>
+                                        <span t-field="o.name"/>
+                                    </p>
+                                    <p style="margin:0;">
+                                        <strong>Date:</strong>
+                                        <span t-field="o.invoice_date"/>
+                                    </p>
+                                    <p style="margin:0;">
+                                        <strong>Due:</strong>
+                                        <span t-field="o.invoice_date_due"/>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================= INFO BLOCKS ================= -->
+                        <div class="row" style="margin-bottom:24px;">
+                            <div class="col-6">
+                                <div style="background:#f7f7f7; padding:12px; border-radius:6px;">
+                                    <h4 style="margin-top:0;">Tenant</h4>
+                                    <p style="margin:0;">
+                                        <strong><span t-field="o.partner_id.name"/></strong>
+                                    </p>
+                                    <p style="margin:0;" t-if="o.partner_id.email">
+                                        <span t-field="o.partner_id.email"/>
+                                    </p>
+                                    <p style="margin:0;" t-if="o.partner_id.phone">
+                                        <span t-field="o.partner_id.phone"/>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="col-6">
+                                <div style="background:#f7f7f7; padding:12px; border-radius:6px;">
+                                    <h4 style="margin-top:0;">Accommodation</h4>
+                                    <t t-if="o.hostel_allocation_id">
+                                        <p style="margin:0;">
+                                            Hostel:
+                                            <strong>
+                                                <span t-field="o.hostel_allocation_id.hostel_id.name"/>
+                                            </strong>
+                                        </p>
+                                        <p style="margin:0;">
+                                            Room:
+                                            <span t-field="o.hostel_allocation_id.room_id.name"/>
+                                        </p>
+                                        <p style="margin:0;">
+                                            Bed:
+                                            <span t-field="o.hostel_allocation_id.bed_id.name"/>
+                                        </p>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================= LINE ITEMS ================= -->
+                        <table style="width:100%; border-collapse:collapse; margin-bottom:24px;">
+                            <thead>
+                                <tr style="background:#222; color:#fff;">
+                                    <th style="padding:10px; text-align:left;">Description</th>
+                                    <th style="padding:10px; text-align:center;">Qty</th>
+                                    <th style="padding:10px; text-align:right;">Unit Price</th>
+                                    <th style="padding:10px; text-align:right;">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.invoice_line_ids" t-as="line"
+                                    style="border-bottom:1px solid #ddd;">
+                                    <td style="padding:10px;">
+                                        <span t-field="line.name"/>
+                                    </td>
+                                    <td style="padding:10px; text-align:center;">
+                                        <span t-field="line.quantity"/>
+                                    </td>
+                                    <td style="padding:10px; text-align:right;">
+                                        <span t-field="line.price_unit"/>
+                                    </td>
+                                    <td style="padding:10px; text-align:right;">
+                                        <span t-field="line.price_subtotal"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- ================= TOTALS CARD ================= -->
+                        <div class="row">
+                            <div class="col-6"/>
+                            <div class="col-6">
+                                <div style="border:2px solid #222; padding:16px; border-radius:8px;">
+                                    <table style="width:100%;">
+                                        <tr>
+                                            <td style="text-align:right; color:#555;">
+                                                Untaxed Amount
+                                            </td>
+                                            <td style="text-align:right;">
+                                                <span t-field="o.amount_untaxed"/>
+                                            </td>
+                                        </tr>
+                                        <tr t-if="o.amount_tax">
+                                            <td style="text-align:right; color:#555;">
+                                                Taxes
+                                            </td>
+                                            <td style="text-align:right;">
+                                                <span t-field="o.amount_tax"/>
+                                            </td>
+                                        </tr>
+                                        <tr style="border-top:2px solid #222;">
+                                            <td style="text-align:right;">
+                                                <strong>Total</strong>
+                                            </td>
+                                            <td style="text-align:right; font-size:18px;">
+                                                <strong>
+                                                    <span t-field="o.amount_total"/>
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================= FOOTER ================= -->
+                        <div style="margin-top:32px; text-align:center; color:#777; font-size:11px;">
+                            This is a system generated invoice. No signature required.
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

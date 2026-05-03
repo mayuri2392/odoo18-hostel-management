@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ================================================= -->
+        <!-- ACTIONS (MUST BE DEFINED BEFORE MENUS) -->
+        <!-- ================================================= -->
+
+        <!-- Dashboard Action -->
+        <record id="action_hostel_dashboard" model="ir.actions.act_window">
+            <field name="name">Dashboard</field>
+            <field name="res_model">hostel.allocation</field>
+            <field name="view_mode">graph,pivot,list</field>
+            <field name="context">
+                {
+                    'search_default_groupby_hostel_id': 1,
+                    'graph_groupbys': ['hostel_id'],
+                    'pivot_row_groupby': ['hostel_id']
+                }
+            </field>
+        </record>
+
+        <!-- Allocation Action (FIXED & SAFE) -->
+        <record id="action_allocation" model="ir.actions.act_window">
+            <field name="name">Allocations</field>
+            <field name="res_model">hostel.allocation</field>
+            <field name="view_mode">kanban,list,form</field>
+        </record>
+
+        <!-- ================================================= -->
+        <!-- MAIN HOSTEL MANAGEMENT MENU -->
+        <!-- ================================================= -->
+
+       <menuitem id="menu_hostel_main"
+                  name="Hostel Management"
+                  sequence="200"/>
+
+        <!-- Dashboard -->
+        <menuitem id="menu_hostel_dashboard"
+                  name="Dashboard"
+                  parent="menu_hostel_main"
+                  action="action_hostel_dashboard"
+                  sequence="10"/>
+
+        <!-- ================================================= -->
+        <!-- PROPERTIES (Hostels + PGs separated) -->
+        <!-- ================================================= -->
+        <menuitem id="menu_hostel_entities"
+                  name="Hostels &amp; PGs"
+                  parent="menu_hostel_main"
+                  sequence="20"/>
+
+        <menuitem id="menu_hostels"
+                  name="Hostels"
+                  parent="menu_hostel_entities"
+                  action="action_hostel_only"
+                  sequence="10"/>
+
+        <menuitem id="menu_pgs"
+                  name="PGs"
+                  parent="menu_hostel_entities"
+                  action="action_pg_only"
+                  sequence="20"/>
+
+        <!-- Operations -->
+        <menuitem id="menu_hostel_operations"
+                  name="Operations"
+                  parent="menu_hostel_main"
+                  sequence="30"/>
+
+        <menuitem id="menu_tenant"
+                  name="Tenants"
+                  parent="menu_hostel_operations"
+                  action="action_tenant"
+                  sequence="10"/>
+
+        <!-- ✔ FIXED: Allocation menu now always appears -->
+        <menuitem id="menu_allocation"
+                  name="Allocations"
+                  parent="menu_hostel_operations"
+                  action="action_allocation"
+                  sequence="20"/>
+
+        <menuitem id="menu_hostel_invoices"
+                  name="Invoices"
+                  parent="menu_hostel_operations"
+                  action="action_hostel_invoice"
+                  sequence="30"/>
+
+        <!-- Reports -->
+        <menuitem id="menu_hostel_reports"
+                  name="Reports"
+                  parent="menu_hostel_main"
+                  sequence="40"/>
+
+        <menuitem id="menu_occupancy_report"
+                  name="Occupancy Report"
+                  parent="menu_hostel_reports"
+                  action="action_occupancy_report_wizard"
+                  sequence="10"/>
+
+        <!-- Configuration -->
+        <menuitem id="menu_hostel_configuration"
+                  name="Configuration"
+                  parent="menu_hostel_main"
+                  sequence="50"/>
+
+        <menuitem id="menu_room_type"
+                  name="Room Types"
+                  parent="menu_hostel_configuration"
+                  action="action_room_type"
+                  sequence="20"/>
+
+        <menuitem id="menu_facility_type"
+                  name="Facility Types"
+                  parent="menu_hostel_configuration"
+                  action="action_facility_type"
+                  sequence="30"/>
+
+        <menuitem id="menu_service_type"
+                  name="Service Types"
+                  parent="menu_hostel_configuration"
+                  action="action_service_type"
+                  sequence="40"/>
+
+    </data>
+</odoo>

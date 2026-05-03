@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Bed Kanban View -->
+        <record id="view_bed_kanban" model="ir.ui.view">
+            <field name="name">hostel.bed.kanban</field>
+            <field name="model">hostel.bed</field>
+            <field name="priority">10</field>
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile o_kanban_grouped" default_group_by="status">
+                    <field name="name"/>
+                    <field name="hostel_id"/>
+                    <field name="room_id"/>
+                    <field name="rent_amount"/>
+                    <field name="status"/>
+                    <field name="allocation_count"/>
+
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click o_kanban_record"
+                                 t-att-data-id="record.id.raw_value"
+                                 style="padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; margin: 4px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+
+                                <!-- Bed Header -->
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                    <div>
+                                        <strong style="font-size: 16px; color: #212529;">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                    <div>
+                                        <t t-if="record.status.raw_value == 'available'">
+                                            <span style="background: #198754; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;">
+                                                Available
+                                            </span>
+                                        </t>
+                                        <t t-elif="record.status.raw_value == 'occupied'">
+                                            <span style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;">
+                                                Occupied
+                                            </span>
+                                        </t>
+                                        <t t-else="">
+                                            <span style="background: #ffc107; color: #212529; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;">
+                                                Maintenance
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <!-- Room & Hostel -->
+                                <div style="margin-bottom: 8px;">
+                                    <div style="display: flex; gap: 12px; font-size: 12px;">
+                                        <div style="color: #495057;">
+                                            <i class="fa fa-building me-1" style="color: #71639e;"></i>
+                                            <field name="hostel_id"/>
+                                        </div>
+                                        <div style="color: #495057;">
+                                            <i class="fa fa-bed me-1" style="color: #71639e;"></i>
+                                            <field name="room_id"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Rent Information -->
+                                <div style="background: #f8f9fa; padding: 8px; border-radius: 6px; margin-bottom: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <div style="font-size: 11px; color: #6c757d; margin-bottom: 2px;">Monthly Rent</div>
+                                            <div style="font-size: 18px; font-weight: bold; color: #71639e;">
+                                                ₹<field name="rent_amount"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Allocation Count -->
+                                <div style="border-top: 1px solid #e9ecef; padding-top: 8px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <div style="font-size: 11px; color: #6c757d;">Allocations</div>
+                                            <div style="font-size: 16px; font-weight: bold; color: #495057;">
+                                                <field name="allocation_count"/>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm" style="background: #71639e; color: white; border: none; padding: 4px 12px; border-radius: 4px; font-size: 12px;">
+                                                View Details
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Bed List View -->
+        <record id="view_bed_list" model="ir.ui.view">
+            <field name="name">hostel.bed.list</field>
+            <field name="model">hostel.bed</field>
+            <field name="priority">5</field>
+            <field name="arch" type="xml">
+                <list string="Beds" editable="bottom">
+                    <field name="name" string="Bed No."/>
+                    <field name="hostel_id"/>
+                    <field name="room_id"/>
+                    <field name="rent_amount" widget="monetary"/>
+                    <field name="allocation_count" widget="integer"/>
+                    <field name="status" widget="badge"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Bed Form View - With maintenance toggle, no radio button -->
+        <record id="view_bed_form" model="ir.ui.view">
+            <field name="name">hostel.bed.form</field>
+            <field name="model">hostel.bed</field>
+            <field name="priority">15</field>
+            <field name="arch" type="xml">
+                <form string="Bed">
+                    <header>
+                        <!-- Statusbar showing computed status -->
+                        <field name="status" widget="statusbar"
+                               statusbar_visible="available,occupied,maintenance"
+                               clickable="false"/>
+                    </header>
+
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="e.g., Bed 1" class="mb-0"/>
+                            </h1>
+                        </div>
+
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_allocations" type="object" class="oe_stat_button" icon="fa-users">
+                                <field name="allocation_count" string="Allocations" widget="statinfo" class="o_stat_value"/>
+                            </button>
+                        </div>
+
+                        <div class="o_notebook mt-4">
+                            <nav class="nav nav-tabs" role="tablist">
+                                <a class="nav-link active" data-bs-toggle="tab" data-bs-target="#bed_info" role="tab">
+                                    <i class="fa fa-info-circle me-2"></i>Bed Information
+                                </a>
+                            </nav>
+
+                            <div class="tab-content">
+                                <!-- Tab 1: Bed Information -->
+                                <div class="tab-pane fade show active" id="bed_info" role="tabpanel">
+                                    <!-- Basic Information Card -->
+                                    <div class="card mb-4">
+                                        <div class="card-header" style="background: linear-gradient(135deg, #71639e 0%, #8a7bbf 100%); color: white;">
+                                            <h6 class="mb-0" style="color: white;">
+                                                <i class="fa fa-bed me-2"></i>Basic Information
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <div class="o_form_label fw-bold mb-2">Bed Details</div>
+                                                        <div class="row">
+                                                            <div class="col-12 mb-3">
+                                                                <field name="name" required="1" placeholder="e.g., Bed 1"/>
+                                                            </div>
+                                                            <div class="col-12 mb-3">
+                                                                <field name="room_id" required="1"/>
+                                                            </div>
+                                                            <div class="col-12 mb-3">
+                                                                <field name="hostel_id" readonly="1"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <div class="o_form_label fw-bold mb-2">Bed Status &amp; Rent</div>
+                                                        <div class="row">
+                                                            <div class="col-12 mb-3">
+                                                                <field name="rent_amount" required="1" class="form-control-lg"/>
+                                                                <small class="text-muted">Monthly rent for this bed</small>
+                                                            </div>
+                                                            <div class="col-12 mb-3">
+                                                                <!-- Show computed status as readonly field -->
+                                                                <field name="status" string="Current Status" readonly="1"/>
+                                                            </div>
+                                                            <div class="col-12 mb-3">
+                                                                <!-- Maintenance toggle for bed -->
+                                                                <field name="maintenance"
+                                                                       string="Bed Under Maintenance"
+                                                                       widget="boolean_toggle"
+                                                                       options="{'label': 'Maintenance Mode'}"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Statistics Cards -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="card text-center border-primary">
+                                                <div class="card-body">
+                                                    <div class="text-primary mb-2">
+                                                        <i class="fa fa-rupee-sign fa-2x"></i>
+                                                    </div>
+                                                    <h3 class="mb-2" style="color: #71639e;">
+                                                        ₹<field name="rent_amount" nolabel="1"/>
+                                                    </h3>
+                                                    <div class="o_form_label text-muted">Monthly Rent</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card text-center border-success">
+                                                <div class="card-body">
+                                                    <div class="text-success mb-2">
+                                                        <i class="fa fa-users fa-2x"></i>
+                                                    </div>
+                                                    <h3 class="mb-2" style="color: #198754;">
+                                                        <field name="allocation_count" widget="integer" nolabel="1"/>
+                                                    </h3>
+                                                    <div class="o_form_label text-muted">Total Allocations</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status Explanation -->
+                                    <div class="alert alert-info mt-4">
+                                        <div class="d-flex">
+                                            <div class="me-2">
+                                                <strong>ℹ</strong>
+                                            </div>
+                                            <div>
+                                                <strong class="text-dark">Bed Status Information</strong>
+                                                <p class="mb-0 text-muted">
+                                                    • <strong>Available:</strong> Bed is ready for allocation<br/>
+                                                    • <strong>Occupied:</strong> Bed is allocated to a guest (set automatically)<br/>
+                                                    • <strong>Maintenance:</strong> Bed is under maintenance (use toggle above)<br/>
+                                                    <em>Note: Occupied status is automatically managed through allocations.</em>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Bed Search View -->
+        <record id="view_bed_search" model="ir.ui.view">
+            <field name="name">hostel.bed.search</field>
+            <field name="model">hostel.bed</field>
+            <field name="arch" type="xml">
+                <search string="Search Beds">
+                    <field name="name" string="Bed No."/>
+                    <field name="hostel_id"/>
+                    <field name="room_id"/>
+                    <filter string="Available Beds" name="available" domain="[('status', '=', 'available')]"/>
+                    <filter string="Occupied Beds" name="occupied" domain="[('status', '=', 'occupied')]"/>
+                    <filter string="Under Maintenance" name="maintenance" domain="[('status', '=', 'maintenance')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Hostel" name="group_hostel" context="{'group_by': 'hostel_id'}"/>
+                        <filter string="Room" name="group_room" context="{'group_by': 'room_id'}"/>
+                        <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Bed Action -->
+        <record id="action_bed" model="ir.actions.act_window">
+            <field name="name">Beds</field>
+            <field name="res_model">hostel.bed</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="view_id" ref="view_bed_kanban"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Beds are usually created automatically when rooms are created.
+                    You can manage bed status and allocations here.
+                </p>
+            </field>
+            <field name="search_view_id" ref="view_bed_search"/>
+            <field name="context">{'search_default_available': 1}</field>
+        </record>
+    </data>
+</odoo>

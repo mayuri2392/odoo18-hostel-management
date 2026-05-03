@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <record id="view_occupancy_report_wizard_form" model="ir.ui.view">
+      <field name="name">hostel.occupancy.report.wizard.form</field>
+      <field name="model">hostel.occupancy.report</field>
+      <field name="arch" type="xml">
+        <form string="Occupancy Report">
+          <sheet>
+
+            <div class="oe_title">
+              <h1>Occupancy Report</h1>
+              <p class="text-muted">Generate analysis or print a professional PDF occupancy report.</p>
+            </div>
+
+            <!-- KPI -->
+            <group col="4">
+              <group>
+                <div class="o_form_label">Total Beds</div>
+                <h2><field name="total_beds" readonly="1"/></h2>
+              </group>
+
+              <group>
+                <div class="o_form_label">Occupied</div>
+                <h2><field name="occupied_beds" readonly="1"/></h2>
+              </group>
+
+              <group>
+                <div class="o_form_label">Available</div>
+                <h2><field name="available_beds" readonly="1"/></h2>
+              </group>
+
+              <group>
+                <div class="o_form_label">Occupancy</div>
+
+                <!-- ✅ Fix % going outside: flex + nowrap -->
+                <div style="display:flex; align-items:baseline; gap:6px; white-space:nowrap;">
+                  <h2 style="margin:0;">
+                    <field name="occupancy_rate" readonly="1"/>
+                  </h2>
+                  <span style="font-size:18px; font-weight:700;">%</span>
+                </div>
+
+              </group>
+            </group>
+
+            <separator string="Filters"/>
+
+            <group>
+              <group>
+                <field name="hostel_id"/>
+                <field name="room_type_id"/>
+              </group>
+              <group>
+                <field name="date_from"/>
+                <field name="date_to"/>
+              </group>
+            </group>
+
+            <separator string="Report Type"/>
+            <group>
+              <field name="report_type" widget="radio"/>
+            </group>
+
+          </sheet>
+
+          <footer>
+            <button name="generate_report" string="Open Analysis" type="object" class="btn-primary"/>
+            <button name="print_pdf_report" string="Print PDF" type="object" class="btn-secondary"/>
+            <button string="Cancel" special="cancel" class="btn-link"/>
+          </footer>
+
+        </form>
+      </field>
+    </record>
+
+    <record id="action_occupancy_report_wizard" model="ir.actions.act_window">
+      <field name="name">Occupancy Report</field>
+      <field name="res_model">hostel.occupancy.report</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
+
+  </data>
+</odoo>

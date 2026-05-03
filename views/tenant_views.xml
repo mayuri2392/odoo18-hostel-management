@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Tenant Kanban -->
+        <record id="view_tenant_kanban" model="ir.ui.view">
+            <field name="name">hostel.tenant.kanban</field>
+            <field name="model">hostel.tenant</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="has_active_allocation">
+                    <field name="name"/>
+                    <field name="tenant_code"/>
+                    <field name="email"/>
+                    <field name="mobile"/>
+                    <field name="has_open_allocation"/>
+                    <field name="has_active_allocation"/>
+                    <field name="total_amount_due"/>
+                    <field name="gender"/>
+                    <field name="allocation_count"/>
+                    <templates>
+
+                        <t t-name="kanban-group-header">
+                            <div t-att-data-id="group.id" class="o_kanban_group_header">
+                                <span class="o_kanban_group_title">
+                                    <t t-if="group.value === true">
+                                        <span style="color: #28a745;">
+                                            <i class="fa fa-check me-1"></i>
+                                            Allocated Tenants
+                                        </span>
+                                        <small class="text-muted">(Currently in hostel)</small>
+                                    </t>
+                                    <t t-elif="group.value === false">
+                                        <span style="color: #fada5e;">
+                                            <i class="fa fa-clock me-1"></i>
+                                            Available Tenants
+                                        </span>
+                                        <small class="text-muted">(Not allocated)</small>
+                                    </t>
+                                    <t t-else="">
+                                        <span t-esc="group.display_name"/>
+                                    </t>
+                                </span>
+                                <span class="o_kanban_group_counter">
+                                    <span t-esc="group.count"/>
+                                </span>
+                            </div>
+                        </t>
+
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click"
+                                 style="padding: 16px; border: 1px solid #dee2e6; border-radius: 8px; margin: 4px; background: white;">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                                    <div style="flex:1;">
+                                        <strong style="color:#71639e; display:block;">
+                                            <field name="name"/>
+                                        </strong>
+                                        <small style="color:#6c757d; font-size:11px;">
+                                            <field name="tenant_code"/>
+                                        </small>
+                                        <div style="color:#6c757d; font-size:11px; margin-top:2px;">
+                                            <field name="gender"/>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <t t-if="record.has_active_allocation.raw_value">
+                                            <span style="background:#28a745; color:white; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:500;">
+                                                ✓ Allocated
+                                            </span>
+                                        </t>
+                                        <t t-else="">
+                                            <span style="background:#fada5e; color:#212529; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:500;">
+                                                ○ Available
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <div style="margin-bottom:12px;">
+                                    <div style="font-size:11px; color:#5a6c7d; margin-bottom:4px;">
+                                        <i class="fa fa-envelope" style="margin-right:6px; color:#71639e;"></i>
+                                        <field name="email"/>
+                                    </div>
+                                    <div style="font-size:11px; color:#5a6c7d;">
+                                        <i class="fa fa-phone" style="margin-right:6px; color:#71639e;"></i>
+                                        <field name="mobile"/>
+                                    </div>
+                                </div>
+
+                                <div style="font-size:11px; color:#5a6c7d;">
+                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                                        <div>
+                                            <div style="color:#6c757d; font-size:10px;">Allocations</div>
+                                            <div style="font-weight:bold; color:#71639e;">
+                                                <field name="allocation_count"/>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div style="color:#6c757d; font-size:10px;">Amount Due</div>
+                                            <div t-att-style="'font-weight:bold; color:' + (record.total_amount_due.raw_value > 0 ? '#dc3545' : '#28a745') + ';'">
+                                                <field name="total_amount_due" widget="monetary"
+                                                       options="{'currency_field': 'currency_id', 'no_symbol': true}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Tenant Form -->
+        <record id="view_tenant_form" model="ir.ui.view">
+            <field name="name">hostel.tenant.form</field>
+            <field name="model">hostel.tenant</field>
+            <field name="arch" type="xml">
+                <form string="Tenant" class="o_tenant_form">
+                    <header>
+                        <button name="action_resume_draft_allocation"
+                                type="object"
+                                string="Resume Draft Allocation"
+                                class="btn-secondary"
+                                invisible="not draft_allocation_id"/>
+
+                        <button name="action_create_allocation"
+                                type="object"
+                                string="Create Allocation"
+                                class="btn-primary"
+                                invisible="has_active_allocation or draft_allocation_id"/>
+
+                        <!-- ✅ Portal buttons (custom) -->
+                        <button name="action_invite_to_portal"
+                                type="object"
+                                string="Invite to Portal"
+                                class="btn-primary"
+                                icon="fa-user-plus"
+                                invisible="user_id"/>
+
+                        <button name="action_resend_portal_invite"
+                                type="object"
+                                string="Re-send Invite"
+                                class="btn-secondary"
+                                icon="fa-envelope"
+                                invisible="not user_id"/>
+
+                        <button name="action_revoke_portal_access"
+                                type="object"
+                                string="Revoke Portal"
+                                class="btn-secondary"
+                                icon="fa-ban"
+                                confirm="This will remove portal access for this tenant. Continue?"
+                                invisible="not user_id"/>
+
+                        <field name="active" widget="boolean_button" options="{'terminology': 'active'}"/>
+                    </header>
+
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Tenant Name"/>
+                            </h1>
+                        </div>
+
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_allocations" type="object" class="oe_stat_button" icon="fa-home">
+                                <field name="allocation_count" string="Allocations" widget="statinfo"/>
+                            </button>
+                            <button name="action_view_invoices" type="object" class="oe_stat_button"
+                                    icon="fa-file-text">
+                                <field name="invoice_count" string="Invoices" widget="statinfo"/>
+                            </button>
+                            <button name="action_view_partner" type="object" class="oe_stat_button" icon="fa-user">
+                                <field name="partner_id" string="Customer" widget="statinfo"/>
+                            </button>
+                        </div>
+
+                        <div class="o_notebook">
+                            <nav class="nav nav-tabs" role="tablist">
+                                <a class="nav-link active" data-bs-toggle="tab" data-bs-target="#personal_info"
+                                   role="tab">Personal Info
+                                </a>
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#academic_info" role="tab">
+                                    Academic Info
+                                </a>
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#contact_info" role="tab">
+                                    Contact &amp; Emergency
+                                </a>
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#payment_info" role="tab">
+                                    Payment Info
+                                </a>
+                            </nav>
+
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="personal_info" role="tabpanel">
+                                    <!-- align items stretch => equal height columns -->
+                                    <div class="row align-items-stretch g-3">
+
+                                        <!-- LEFT: Personal Info (make it full height) -->
+                                        <div class="col-lg-8 d-flex">
+                                            <div class="card w-100 h-100">
+                                                <div class="card-header" style="background-color:#71639e; color:white;">
+                                                    <h6 class="mb-0" style="color:white;">Personal Information</h6>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <group>
+                                                                <field name="partner_id" string="Tenant" required="1"/>
+                                                                <field name="gender"/>
+                                                                <field name="date_of_birth"/>
+                                                                <field name="age" readonly="1"/>
+                                                            </group>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <group>
+                                                                <field name="id_proof_type"/>
+                                                                <field name="id_proof_number"/>
+                                                                <field name="tenant_code" readonly="1"/>
+                                                            </group>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- RIGHT: Profile Photo (same height + bigger image) -->
+                                        <div class="col-lg-4 d-flex">
+                                            <div class="card w-100 h-100">
+                                                <div class="card-header" style="background-color:#71639e; color:white;">
+                                                    <h6 class="mb-0" style="color:white;">Profile Photo</h6>
+                                                </div>
+
+                                                <!-- Make the body take full height and center image -->
+                                                <div class="card-body d-flex align-items-center justify-content-center"
+                                                     style="min-height: 320px;">
+                                                    <field name="image_1920"
+                                                           widget="image"
+                                                           options="{'preview_image': 'image_1920', 'size': [320, 320]}"
+                                                           style="width:320px;height:320px;object-fit:cover;border-radius:12px;"/>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                                <div class="tab-pane fade" id="academic_info" role="tabpanel">
+                                    <div class="card">
+                                        <div class="card-header" style="background-color:#71639e; color:white;">
+                                            <h6 class="mb-0" style="color:white;">Academic Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <group>
+                                                        <field name="college_name"/>
+                                                        <field name="course"/>
+                                                    </group>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <group>
+                                                        <field name="year_of_study"/>
+                                                        <field name="registration_date" readonly="1"/>
+                                                    </group>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade" id="contact_info" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header" style="background-color:#71639e; color:white;">
+                                                    <h6 class="mb-0" style="color:white;">Contact Information</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <group>
+                                                        <field name="email" widget="email"/>
+                                                        <field name="mobile" widget="phone"/>
+                                                    </group>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header"
+                                                     style="background-color:#fada5e; color:#212529;">
+                                                    <h6 class="mb-0" style="color:#212529;">Emergency Contact</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <group>
+                                                        <field name="emergency_contact"/>
+                                                        <field name="emergency_phone" widget="phone"/>
+                                                        <field name="emergency_relation"/>
+                                                    </group>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade" id="payment_info" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color:#71639e;">
+                                                        <field name="total_amount_paid" widget="monetary" nolabel="1"
+                                                               options="{'currency_field': 'currency_id'}"/>
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Total Paid</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color:#71639e;">
+                                                        <field name="total_amount_due" widget="monetary" nolabel="1"
+                                                               options="{'currency_field': 'currency_id'}"/>
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Amount Due</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color:#71639e;">
+                                                        <field name="allocation_count" widget="integer" nolabel="1"/>
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Allocations</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color:#71639e;">
+                                                        <field name="invoice_count" widget="integer" nolabel="1"/>
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Invoices</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tenant List -->
+        <record id="view_tenant_list" model="ir.ui.view">
+            <field name="name">hostel.tenant.list</field>
+            <field name="model">hostel.tenant</field>
+            <field name="arch" type="xml">
+                <list string="Tenants">
+                    <field name="name"/>
+                    <field name="tenant_code"/>
+                    <field name="gender"/>
+                    <field name="email"/>
+                    <field name="mobile"/>
+                    <field name="full_address"/>
+                    <field name="allocation_count"/>
+                    <field name="has_open_allocation" widget="boolean"/>
+                    <field name="total_amount_due" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    <field name="active" widget="boolean"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Tenant Search -->
+        <record id="view_tenant_search" model="ir.ui.view">
+            <field name="name">hostel.tenant.search</field>
+            <field name="model">hostel.tenant</field>
+            <field name="arch" type="xml">
+                <search string="Search Tenants">
+                    <field name="name"/>
+                    <field name="tenant_code"/>
+                    <field name="gender"/>
+                    <field name="email"/>
+                    <field name="mobile"/>
+                    <field name="full_address"/>
+                    <field name="id_proof_number"/>
+                    <filter string="Active Tenants" name="active" domain="[('active', '=', True)]"/>
+                    <filter string="With Active Allocation" name="has_allocation"
+                            domain="[('has_active_allocation', '=', True)]"/>
+                    <filter string="No Active Allocation" name="no_allocation"
+                            domain="[('has_active_allocation', '=', False)]"/>
+                    <filter string="With Due Amount" name="has_due" domain="[('total_amount_due', '&gt;', 0)]"/>
+                    <filter string="No Due Amount" name="no_due" domain="[('total_amount_due', '&lt;=', 0)]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Gender" name="group_gender" context="{'group_by': 'gender'}"/>
+                        <filter string="Year of Study" name="group_year" context="{'group_by': 'year_of_study'}"/>
+                        <filter string="Active Status" name="group_active"
+                                context="{'group_by': 'has_active_allocation'}"/>
+                        <filter string="ID Proof Type" name="group_id_proof" context="{'group_by': 'id_proof_type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Tenant Action -->
+        <record id="action_tenant" model="ir.actions.act_window">
+            <field name="name">Tenants</field>
+            <field name="res_model">hostel.tenant</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="context">{'search_default_active': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">Create your first tenant!</p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

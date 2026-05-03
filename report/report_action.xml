@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record id="report_occupancy_pdf" model="ir.actions.report">
+      <field name="name">Occupancy Report</field>
+      <field name="model">hostel.occupancy.report</field>
+      <field name="report_type">qweb-pdf</field>
+      <field name="report_name">hostel_management.report_occupancy_pdf_document</field>
+      <field name="report_file">hostel_management.report_occupancy_pdf_document</field>
+    </record>
+  </data>
+</odoo>

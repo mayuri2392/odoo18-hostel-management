@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Room Kanban View -->
+        <record id="view_room_kanban" model="ir.ui.view">
+            <field name="name">hostel.room.kanban</field>
+            <field name="model">hostel.room</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="name"/>
+                    <field name="hostel_id"/>
+                    <field name="floor"/>
+                    <field name="room_type_id"/>
+                    <field name="capacity"/>
+                    <field name="available_beds"/>
+                    <field name="rent_amount"/>
+                    <field name="status"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click"
+                                 style="padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; margin: 4px; background: white;">
+                                <div style="margin-bottom: 8px;">
+                                    <strong style="font-size: 14px; color: #212529;">
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                                <div style="margin-bottom: 8px; font-size: 12px;">
+                                    <div style="color: #495057;">
+                                        <field name="hostel_id"/>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <div>
+                                        <span style="font-size: 12px; color: #6c757d;">Floor:</span>
+                                        <span style="font-size: 12px;">
+                                            <field name="floor"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <t t-if="record.status.raw_value == 'available'">
+                                            <span style="background: #198754; color: white; padding: 2px 6px; border-radius: 10px; font-size: 9px;">
+                                                Available
+                                            </span>
+                                        </t>
+                                        <t t-elif="record.status.raw_value == 'occupied'">
+                                            <span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 10px; font-size: 9px;">
+                                                Occupied
+                                            </span>
+                                        </t>
+                                        <t t-else="">
+                                            <span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 10px; font-size: 9px;">
+                                                Maintenance
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                                    <div>
+                                        <span style="color: #6c757d;">Capacity:</span>
+                                        <span style="font-weight: bold; color: #71639e;">
+                                            <field name="capacity"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span style="color: #6c757d;">Available:</span>
+                                        <span style="font-weight: bold; color: #71639e;">
+                                            <field name="available_beds"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e9ecef;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-size: 11px; color: #6c757d;">Rent:</span>
+                                        <span style="font-size: 13px; font-weight: bold; color: #71639e;">₹
+                                            <field name="rent_amount"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Room List View -->
+        <record id="view_room_list" model="ir.ui.view">
+            <field name="name">hostel.room.list</field>
+            <field name="model">hostel.room</field>
+            <field name="arch" type="xml">
+                <list string="Rooms">
+                    <field name="name"/>
+                    <field name="hostel_id"/>
+                    <field name="floor" widget="selection"/>
+                    <field name="room_type_id"/>
+                    <field name="capacity" widget="selection" string="Beds"/>
+                    <field name="available_beds"/>
+                    <field name="rent_amount"/>
+                    <field name="status" widget="badge"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Room Form View - SIMPLIFIED: Removed action buttons -->
+        <record id="view_room_form" model="ir.ui.view">
+            <field name="name">hostel.room.form</field>
+            <field name="model">hostel.room</field>
+            <field name="arch" type="xml">
+                <form string="Room">
+                    <header>
+                        <!-- Only keep statusbar -->
+                        <field name="status" widget="statusbar" statusbar_visible="available,occupied,maintenance"
+                               clickable="false"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Room Name" class="mb-0"/>
+                            </h1>
+                        </div>
+
+                        <!-- Smart Buttons -->
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_beds" type="object" class="oe_stat_button" icon="fa-bed">
+                                <field name="bed_count" string="Total Beds" widget="statinfo" class="o_stat_value"/>
+                            </button>
+                        </div>
+
+                        <div class="o_notebook">
+                            <nav class="nav nav-tabs" role="tablist">
+                                <a class="nav-link active" data-bs-toggle="tab" data-bs-target="#room_info" role="tab">
+                                    Room Information
+                                </a>
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#addons" role="tab">
+                                    Add-ons
+                                </a>
+
+                            </nav>
+                            <div class="tab-content">
+                                <!-- Tab 1: Room Information -->
+                                <div class="tab-pane fade show active" id="room_info" role="tabpanel">
+                                    <div class="card mb-4">
+                                        <div class="card-header" style="background-color: #71639e; color: white;">
+                                            <h6 class="mb-0" style="color: white;">Basic Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <group>
+                                                        <field name="name" required="1"/>
+                                                        <field name="hostel_id" required="1"/>
+                                                        <field name="floor" widget="selection" required="1"
+                                                               string="Floor Level"/>
+                                                    </group>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <group>
+                                                        <field name="room_type_id" required="1"/>
+                                                        <field name="capacity" widget="selection" required="1"
+                                                               string="Number of Beds"/>
+                                                        <!-- Keep only the maintenance toggle -->
+                                                        <field name="room_maintenance"
+                                                               string="Room Maintenance"
+                                                               widget="boolean_toggle"
+                                                               options="{'label': 'Maintenance Mode'}"/>
+                                                    </group>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card mb-4">
+                                        <div class="card-header" style="background-color: #71639e; color: white;">
+                                            <h6 class="mb-0" style="color: white;">Rent Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <field name="rent_amount" required="1"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <field name="base_rent_amount" readonly="1"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color: #71639e;">
+                                                        <field name="bed_count" widget="integer" nolabel="1"/>
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Total Beds</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color: #71639e;">
+                                                        <field name="available_beds" widget="integer" nolabel="1"/>
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Available Beds</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color: #71639e;">
+                                                        <field name="occupied_beds" widget="integer" nolabel="1"/>
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Occupied Beds</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="mb-2" style="color: #71639e;"><field
+                                                            name="occupancy_rate" widget="integer" nolabel="1"/>%
+                                                    </h5>
+                                                    <div class="o_form_label text-muted">Occupancy Rate</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tab 2: Add-ons -->
+                                <div class="tab-pane fade" id="addons" role="tabpanel">
+                                    <div class="card">
+                                        <div class="card-header" style="background-color: #71639e; color: white;">
+                                            <div>
+                                                <h6 class="mb-0" style="color: white;">Room Add-ons</h6>
+                                                <small style="color: rgba(255,255,255,0.75);">
+                                                    Select add-ons available for this room
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-body">
+                                            <div class="mb-2">
+                                                <div class="o_form_label fw-bold mb-2">Available Add-ons</div>
+
+                                                <field name="facility_ids"
+                                                       widget="many2many_tags"
+                                                       class="w-100"
+                                                       domain="[('id','in', allowed_addon_ids)]"
+                                                       options="{'no_create': True, 'no_open': True}"
+                                                       placeholder="+ Select chargeable add-ons available for this room...."/>
+
+                                                <small class="text-muted">
+                                                    Add-ons list comes from <b>Hostel → Facilities → Add-ons</b>.
+                                                </small>
+                                            </div>
+
+                                            <div class="alert alert-info mt-3">
+                                                <div class="d-flex">
+                                                    <div class="me-2">
+                                                        <strong>ℹ</strong>
+                                                    </div>
+                                                    <div>
+                                                        <strong class="text-dark">Add-on Configuration</strong>
+                                                        <p class="mb-0 text-muted">
+                                                            Only hostel-selected add-ons can be used here. Prices are
+                                                            configured in
+                                                            <b>Hostel → Rent Configuration → Add-on Rates</b>.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Room Search View -->
+        <record id="view_room_search" model="ir.ui.view">
+            <field name="name">hostel.room.search</field>
+            <field name="model">hostel.room</field>
+            <field name="arch" type="xml">
+                <search string="Search Rooms">
+                    <field name="name"/>
+                    <field name="hostel_id"/>
+                    <field name="room_type_id"/>
+                    <filter string="Available" name="available" domain="[('status', '=', 'available')]"/>
+                    <filter string="Occupied" name="occupied" domain="[('status', '=', 'occupied')]"/>
+                    <filter string="Maintenance" name="maintenance" domain="[('status', '=', 'maintenance')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Hostel" name="group_hostel" context="{'group_by': 'hostel_id'}"/>
+                        <filter string="Floor" name="group_floor" context="{'group_by': 'floor'}"/>
+                        <filter string="Room Type" name="group_room_type" context="{'group_by': 'room_type_id'}"/>
+                        <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Room Action -->
+        <record id="action_room" model="ir.actions.act_window">
+            <field name="name">Rooms</field>
+            <field name="res_model">hostel.room</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="context">{'search_default_available': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">Create your first room!</p>
+            </field>
+        </record>
+    </data>
+</odoo>
