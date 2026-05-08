@@ -34,9 +34,13 @@ workflows in Odoo 18 Community.
 
 Requires Odoo 18 Community with `account`, `portal`, and `contacts` installed.
 
+1. Clone the repo into your addons folder:
 ```bash
-./odoo-bin -c odoo.conf -i hostel_management
+git clone https://github.com/mayuri2392/odoo18-hostel-management.git \
+  ~/Projects/odoo18/custom_addons/hostel_management
 ```
+2. Restart Odoo
+3. Go to Settings → Apps → search `hostel_management` → Install
 
 ## Author
 
